@@ -1,3 +1,5 @@
+// src/Farming.js
+
 import React, { useState, useEffect } from 'react';
 import { FaCoins, FaClock } from 'react-icons/fa';
 import { motion } from 'framer-motion';
@@ -15,7 +17,7 @@ const Farming = ({ telegramId }) => {
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const response = await axios.get(`/api/users/${telegramId}`);
+        const response = await axios.get(`/api/users/${telegramId}/coins`);
         setCoins(response.data.coins);
       } catch (error) {
         console.error("Error fetching user data:", error);
