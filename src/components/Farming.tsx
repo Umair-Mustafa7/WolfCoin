@@ -16,7 +16,7 @@ const Farming = ({ telegramId }) => {
   // Fetch user coins when the component mounts
   useEffect(() => {
     const fetchUserCoins = async () => {
-      const response = await axios.get(`http://localhost:5000/api/user/${telegramId}`);
+      const response = await axios.get(`https://wolf-coin-ho99.vercel.app/api/user/${telegramId}`);
       setCoins(response.data.coins);
     };
 
@@ -46,7 +46,7 @@ const Farming = ({ telegramId }) => {
 
       // Update the user's coin count in the database
       try {
-        await axios.post(`http://localhost:5000/api/user/${telegramId}`, { coins: newCoinCount });
+        await axios.post(`https://wolf-coin-ho99.vercel.app/api/user/${telegramId}`, { coins: newCoinCount });
       } catch (error) {
         console.error("Error updating coins:", error);
       }
