@@ -1,0 +1,26 @@
+.top-bar {
+  background-color: #333;
+  padding: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.avatar {
+  margin-right: 20px;
+}
+
+.avatar img {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+}
+
+.stats {
+  font-size: 18px;
+  color: #fff;
+}
+
+.stats span {
+  margin-right: 10px;
+}
