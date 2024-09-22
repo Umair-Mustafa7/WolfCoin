@@ -15,16 +15,12 @@ const Farming = ({ telegramId }) => {
 
   // Fetch user coins when the component mounts
   useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        const response = await axios.get(`/api/users/${telegramId}/coins`);
-        setCoins(response.data.coins);
-      } catch (error) {
-        console.error("Error fetching user data:", error);
-      }
+    const fetchUserCoins = async () => {
+      const response = await axios.get(`http://localhost:5000/api/user/${telegramId}`);
+      setCoins(response.data.coins);
     };
 
-    fetchUserData();
+    fetchUserCoins();
   }, [telegramId]);
 
   useEffect(() => {
@@ -50,7 +46,7 @@ const Farming = ({ telegramId }) => {
 
       // Update the user's coin count in the database
       try {
-        await axios.post(`/api/users/${telegramId}/coins`, { coins: newCoinCount });
+        await axios.post(`http://localhost:5000/api/user/${telegramId}`, { coins: newCoinCount });
       } catch (error) {
         console.error("Error updating coins:", error);
       }
