@@ -7,9 +7,11 @@ import axios from 'axios';
 
 const Farming = ({ telegramId }) => {
   console.log("Telegram ID:", telegramId);
+  
   if (!telegramId) {
     return <div>Error: Telegram ID is required.</div>; // Handle the error gracefully
   }
+
   const [coins, setCoins] = useState(0);
   const [progress, setProgress] = useState(0);
   const [timeLeft, setTimeLeft] = useState(0);
@@ -19,14 +21,16 @@ const Farming = ({ telegramId }) => {
 
   // Fetch user coins when the component mounts
   useEffect(() => {
-    if (telegramId) {
-      const fetchUserCoins = async () => {
+    const fetchUserCoins = async () => {
+      try {
         const response = await axios.get(`https://wolf-coin-ho99.vercel.app/api/user/${telegramId}`);
         setCoins(response.data.coins);
-      };
-  
-      fetchUserCoins();
-    }
+      } catch (error) {
+        console.error("Error fetching user coins:", error);
+      }
+    };
+
+    fetchUserCoins();
   }, [telegramId]);
 
   useEffect(() => {
