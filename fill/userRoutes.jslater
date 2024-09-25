@@ -1,10 +1,20 @@
 // routes/userRoutes.js
 
-const express = require('express');
+import express from 'express';
 const router = express.Router();
-const User = require('../models/User');
+import User from '../models/User.js';
+
 
 // Get user data by Telegram ID
+router.get('/users', async (req, res) => {
+  try {
+    const users = await User.find();  // Fetch all users from MongoDB
+    res.status(200).json(users);      // Return users as JSON
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch users' });
+  }
+});
+
 router.get('/user/:telegramId', async (req, res) => {
   const { telegramId } = req.params;
 
@@ -37,4 +47,5 @@ router.post('/user/:telegramId', async (req, res) => {
   }
 });
 
-module.exports = router;
+
+export default router;

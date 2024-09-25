@@ -1,0 +1,73 @@
+
+
+import express from 'express';
+import mongoose from 'mongoose';
+import userRoutes from './routes/userRoutes.js';
+import dotenv from 'dotenv';
+
+// Load environment variables from .env
+dotenv.config(); 
+ // Remember to include .js extension for local imports
+
+const app = express();
+console.log('MongoDB URI:', process.env.MONGODB_URI);
+
+app.use(express.json());
+app.get('/', (req, res) => {
+  res.send('Welcome to the Telegram Bot API!');
+});
+
+// Use your other routes (e.g., for handling Telegram webhook)
+app.use('/api', userRoutes);
+
+// Webhook route for Telegram
+
+app.post('/webhook', async (req, res) => {
+  console.log('Webhook route hit');
+  const { message } = req.body;
+
+  console.log('Webhook triggered:', message); 
+
+  if (message) {
+    const { from, text } = message;
+    const { id: telegramId, first_name: firstName, last_name: lastName, username } = from;
+
+    // Log the incoming Telegram message for debugging purposes
+    console.log(`Received message from ${username}: ${text}`);
+
+    try {
+      // Find the user by Telegram ID or create a new one if it doesn't exist
+      const user = await User.findOneAndUpdate(
+        { telegramId },  // Search for the user by Telegram ID
+        {
+          telegramId,      // Update or set the Telegram ID
+          username,        // Update or set the username
+          firstName,       // Update or set the first name
+          lastName,        // Update or set the last name
+          $inc: { gems: 10 }  // Increment gems by 10 (or any value) each time a message is received
+        },
+        { new: true, upsert: true }  // Create the user if it doesn't exist (upsert)
+      );
+
+      console.log(`User data stored/updated: ${user}`);
+      res.status(200).send('OK');
+    } catch (error) {
+      console.error('Error saving user data:', error);
+      res.status(500).send('Error saving user data');
+    }
+  } else {
+    res.status(400).send('No message received');
+  }
+});
+
+app.use('/api', userRoutes);
+
+mongoose.connect(process.env.MONGODB_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+})
+  .then(() => console.log('MongoDB connected'))
+  .catch(err => console.log('MongoDB connection error:', err));
+
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

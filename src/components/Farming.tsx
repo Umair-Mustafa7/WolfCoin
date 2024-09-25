@@ -8,7 +8,7 @@ import axios from 'axios';
 const Farming = ({ telegramId }) => {
   const [gems, setGems] = useState(0);
   const [timeLeft, setTimeLeft] = useState(0);
-  const farmingInterval = 5 * 1000; // 30 seconds
+  const farmingInterval = 30 * 1000; // 30 seconds
   const [showModal, setShowModal] = useState(false);
   const [buttonVisible, setButtonVisible] = useState(true);
 
@@ -36,19 +36,19 @@ const Farming = ({ telegramId }) => {
   }, [timeLeft]);
 
   const handleCollectGems = async () => {
-    const newGemCount = gems + 100; // Assume the user collects 100 gems
-  
-    try {
-      const response = await axios.post(`http://localhost:5000/api/user/${telegramId}`, {
-        gems: newGemCount,
-      });
-  
-      if (response.data.success) {
-        setGems(newGemCount); // Update local state
-        setShowModal(true);    // Show the modal to the user
+    if (timeLeft <= 0) {
+      const newGemCount = gems + 100; // Collect 100 gems each time
+      setGems(newGemCount);
+      setTimeLeft(farmingInterval);
+      setShowModal(true);
+      setButtonVisible(false); // Hide button after collection
+
+      // Update user's gem count in the backend
+      try {
+        await axios.post(`http://localhost:5000/api/user/${telegramId}`, { gems: newGemCount });
+      } catch (error) {
+        console.error("Error updating gems:", error);
       }
-    } catch (error) {
-      console.error('Error updating gems:', error);
     }
   };
 
