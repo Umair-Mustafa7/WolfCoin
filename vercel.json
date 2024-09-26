@@ -1,23 +1,14 @@
 {
   "version": 2,
   "builds": [
-    {
-      "src": "api/**/*.js",
-      "use": "@vercel/node"
-    },
-    {
-      "src": "src/**/*",
-      "use": "@vercel/static-build"
-    }
+    { "src": "api/**/*.js", "use": "@vercel/node" },         
+    { "src": "src/**/*", "use": "@vercel/static-build" }      
   ],
   "routes": [
-    {
-      "src": "/api/(.*)",
-      "dest": "/api/$1"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/src/index.html"
-    }
-  ]
+    { "src": "/api/(.*)", "dest": "/api/$1" },                
+    { "src": "/(.*)", "dest": "/src/index.html" }            
+  ],
+  "env": {
+    "MONGODB_URI": "@mongodb_uri"  
+  }
 }
