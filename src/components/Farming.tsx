@@ -1,26 +1,40 @@
-import React, { useState, useEffect } from 'react';
-import { FaGem, FaTrophy } from 'react-icons/fa';
+import React, { useState, useEffect, useContext } from 'react';
+import { FaGem, FaLevelUpAlt } from 'react-icons/fa';
 import { CircularProgressbar, buildStyles } from 'react-circular-progressbar';
 import 'react-circular-progressbar/dist/styles.css';
 import { motion } from 'framer-motion';
 import axios from 'axios';
+import toast, { Toaster } from 'react-hot-toast';
+import { GemContext } from './GemContext'; // Import the context
 
 const Farming = ({ telegramId }) => {
-  const [gems, setGems] = useState(0);
+  const { gems, addGems } = useContext(GemContext); // Get gems and addGems from context
+  const [level, setLevel] = useState(1); // User level
   const [timeLeft, setTimeLeft] = useState(0);
-  const farmingInterval = 30 * 1000; // 30 seconds
   const [showModal, setShowModal] = useState(false);
   const [buttonVisible, setButtonVisible] = useState(true);
+  const [userName, setUserName] = useState('User'); // Store Telegram user's name
+  const farmingInterval = 2 * 1000; // Farming interval time (adjust as needed)
 
-  // Fetch user gems when the component mounts
+  // Fetch user data (gems, level, name) when the component mounts
   useEffect(() => {
-    const fetchUserGems = async () => {
-      const response = await axios.get(`http://localhost:5000/api/user/${telegramId}`);
-      setGems(response.data.gems);
+    const fetchUserData = async () => {
+      try {
+        const response = await axios.get(`https://wolf-coin-ho99.vercel.app/api/user`, {
+          params: { telegramId },
+        });
+        addGems(response.data.gems); // Update the global gems state
+        setLevel(response.data.level || 1); // Default level is 1
+        setUserName(response.data.username || 'User'); // Fetch Telegram username
+        toast.success('Welcome back! Keep farming those gems!'); // Success notification
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+        toast.error('Failed to load user data');
+      }
     };
 
-    fetchUserGems();
-  }, [telegramId]);
+    fetchUserData();
+  }, [telegramId, addGems]);
 
   // Timer countdown and button visibility
   useEffect(() => {
@@ -37,17 +51,26 @@ const Farming = ({ telegramId }) => {
 
   const handleCollectGems = async () => {
     if (timeLeft <= 0) {
-      const newGemCount = gems + 100; // Collect 100 gems each time
-      setGems(newGemCount);
+      const newGemCount = gems + 100; // Collect 100 gems
+      const newLevel = Math.floor(newGemCount / 500) + 1; // Level up every 500 gems
+
+      addGems(100); // Update global gems
+      setLevel(newLevel);
       setTimeLeft(farmingInterval);
       setShowModal(true);
       setButtonVisible(false); // Hide button after collection
 
-      // Update user's gem count in the backend
+      // Update user data in the backend
       try {
-        await axios.post(`http://localhost:5000/api/user/${telegramId}`, { gems: newGemCount });
+        await axios.post(`https://wolf-coin-ho99.vercel.app/api/user`, {
+          telegramId,
+          gems: newGemCount,
+          level: newLevel,
+        });
+        toast.success(`You collected 100 gems! You're now at Level ${newLevel}.`);
       } catch (error) {
-        console.error("Error updating gems:", error);
+        console.error('Error updating gems:', error);
+        toast.error('Error collecting gems');
       }
     }
   };
@@ -56,34 +79,54 @@ const Farming = ({ telegramId }) => {
   const progress = (timeLeft / farmingInterval) * 100;
 
   return (
-    <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center p-8">
-      {/* Title and Gem Count */}
+    <div className="min-h-screen bg-gradient-to-r from-purple-800 to-blue-900 text-white flex flex-col items-center justify-center p-4 md:p-8 relative">
+      <Toaster /> {/* Notification container */}
+
+      {/* Profile Avatar and Username */}
+      <div className="absolute top-4 left-4 flex items-center space-x-4">
+        {/* Avatar */}
+        <img
+          src="https://via.placeholder.com/50" // Use Telegram avatar if available
+          alt="User Avatar"
+          className="w-10 h-10 md:w-12 md:h-12 rounded-full border-2 border-purple-500"
+        />
+        {/* Username */}
+        <div>
+          <p className="text-lg md:text-xl font-semibold text-gray-100">{userName}</p>
+        </div>
+      </div>
+
+      {/* Title, Gem Count, and Level */}
       <motion.div 
-        className="w-full max-w-lg mb-8 p-6 rounded-2xl shadow-lg bg-gray-900 border border-purple-500"
+        className="w-full max-w-lg mb-8 p-6 rounded-2xl shadow-lg bg-gray-900 border border-purple-500 text-center"
         initial={{ opacity: 0 }} 
         animate={{ opacity: 1 }} 
         transition={{ duration: 0.5 }}
       >
-        <h1 className="text-4xl font-extrabold text-center text-purple-400">Gem Farming</h1>
-        <div className="flex justify-center items-center mt-6">
-          <FaGem className="text-purple-400 text-5xl mr-4" />
-          <span className="text-3xl font-bold">Gems: {gems}</span>
+        <h1 className="text-3xl md:text-5xl font-extrabold text-purple-400">Gem Farming</h1>
+        <div className="flex justify-center items-center mt-4 md:mt-6">
+          <FaGem className="text-4xl md:text-5xl text-purple-400 mr-2 md:mr-4" />
+          <span className="text-2xl md:text-3xl font-bold">Gems: {gems}</span>
+        </div>
+        <div className="flex justify-center items-center mt-4">
+          <FaLevelUpAlt className="text-3xl md:text-4xl text-yellow-400 mr-2 md:mr-4" />
+          <span className="text-xl md:text-2xl font-bold">Level: {level}</span>
         </div>
       </motion.div>
 
       {/* Circular Progress Bar */}
       <motion.div
-        className="mb-10"
+        className="mb-6 md:mb-10"
         initial={{ scale: 0.8 }}
         animate={{ scale: 1 }}
         transition={{ duration: 0.5 }}
       >
-        <div className="relative w-48 h-48">
+        <div className="relative w-32 h-32 md:w-48 md:h-48">
           <CircularProgressbar
             value={progress}
             text={timeLeft > 0 ? `${Math.floor(timeLeft / 1000)}s` : 'Ready!'}
             styles={buildStyles({
-              textSize: '16px',
+              textSize: '12px',
               pathColor: `rgba(129, 62, 245, ${progress / 100})`,
               textColor: '#fff',
               trailColor: '#202020',
@@ -97,28 +140,13 @@ const Farming = ({ telegramId }) => {
       {buttonVisible && (
         <motion.button
           onClick={handleCollectGems}
-          className="bg-gradient-to-r from-purple-500 to-purple-700 py-3 px-10 rounded-full text-lg font-bold text-white hover:scale-105 transition-transform duration-300"
+          className="bg-gradient-to-r from-purple-500 to-purple-700 py-2 px-6 md:py-3 md:px-10 rounded-full text-base md:text-lg font-bold text-white hover:scale-105 transition-transform duration-300"
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.95 }}
         >
           {timeLeft > 0 ? 'Collecting...' : 'Collect 100 Gems'}
         </motion.button>
       )}
-
-      {/* Leaderboard */}
-      <motion.div
-        className="mt-12 w-full max-w-lg p-6 rounded-2xl bg-gray-900 border border-blue-500"
-        initial={{ opacity: 0 }} 
-        animate={{ opacity: 1 }} 
-        transition={{ duration: 0.5 }}
-      >
-        <h2 className="text-2xl font-bold text-center text-blue-400 mb-4">Leaderboard</h2>
-        <ul className="text-lg text-gray-300">
-          <li className="mb-2"><FaTrophy className="inline text-yellow-400 mr-2" /> Player1 - 1500 Gems</li>
-          <li className="mb-2"><FaTrophy className="inline text-yellow-400 mr-2" /> Player2 - 1300 Gems</li>
-          <li className="mb-2"><FaTrophy className="inline text-yellow-400 mr-2" /> Player3 - 1100 Gems</li>
-        </ul>
-      </motion.div>
 
       {/* Collection Modal */}
       {showModal && (
@@ -134,8 +162,9 @@ const Farming = ({ telegramId }) => {
             animate={{ scale: 1 }}
             transition={{ duration: 0.3 }}
           >
-            <h2 className="text-3xl font-bold text-purple-400">Gems Collected!</h2>
+            <h2 className="text-2xl md:text-3xl font-bold text-purple-400">Gems Collected!</h2>
             <p className="mt-4 text-lg text-white">You've collected <span className="font-bold text-purple-400">100 Gems!</span></p>
+            <p className="mt-2 text-lg text-white">Level: {level}</p>
             <button
               onClick={() => setShowModal(false)}
               className="mt-6 py-2 px-6 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full text-white font-bold transition hover:scale-105"
