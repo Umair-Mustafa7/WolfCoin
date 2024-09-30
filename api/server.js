@@ -1,50 +1,79 @@
-require('dotenv').config(); // Load environment variables from .env
-
 const express = require('express');
 const mongoose = require('mongoose');
-const cors = require('cors');
-const userRoutes = require('./users'); // Adjust path as per your folder structure
+const TelegramBot = require('node-telegram-bot-api');
+require('dotenv').config();
 
 const app = express();
-let isConnected = false; // Track MongoDB connection status to avoid reconnecting on every function call
+app.use(express.json()); // Middleware to parse JSON request bodies
 
-app.get('/static/:filename', (req, res) => {
-  res.setHeader('Content-Type', 'application/javascript');
-  res.sendFile(`/path/to/javascript/files/${req.params.filename}`);
+// Connect to MongoDB
+mongoose.connect(process.env.MONGO_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
 });
 
+// Define User model for MongoDB
+const User = mongoose.model('User', new mongoose.Schema({
+  telegramId: { type: String, unique: true },  // Unique identifier for each Telegram user
+  username: String,  // Telegram username
+  gems: { type: Number, default: 0 },  // Gem balance for each user
+}));
 
-app.use(cors());
-app.use(express.json());
+// Initialize Telegram bot
+const bot = new TelegramBot(process.env.TELEGRAM_TOKEN, { polling: true });
 
-// MongoDB Connection Logic
-const connectToDatabase = async () => {
-  if (isConnected) {
-    console.log('Using existing database connection');
-    return; // If already connected, return to avoid reconnecting
+// Bot command to register new users or greet existing users
+bot.onText(/\/start/, async (msg) => {
+  const chatId = msg.chat.id;
+  const username = msg.from.username || 'NoUsername'; // Telegram username
+
+  let user = await User.findOne({ telegramId: chatId });
+  if (!user) {
+    // Create a new user if not found
+    user = new User({ telegramId: chatId, username });
+    await user.save();
+    bot.sendMessage(chatId, `Welcome, ${username}! You are now registered.`);
+  } else {
+    bot.sendMessage(chatId, `Welcome back, ${username}! You have ${user.gems} gems.`);
   }
-
-  try {
-    await mongoose.connect(process.env.MONGO_URI, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
-    isConnected = true; // Set connected status
-    console.log('Connected to MongoDB');
-  } catch (error) {
-    console.error('MongoDB connection error:', error);
-    process.exit(1); // Exit the serverless function if MongoDB connection fails
-  }
-};
-
-// Call the connection function before handling any routes
-app.use(async (req, res, next) => {
-  await connectToDatabase(); // Ensure MongoDB connection before each request
-  next();
 });
 
-// Routes
-app.use('/api/users', userRoutes);
+// Bot command to retrieve gem balance
+bot.onText(/\/getgems/, async (msg) => {
+  const chatId = msg.chat.id;
+  const user = await User.findOne({ telegramId: chatId });
+  if (user) {
+    bot.sendMessage(chatId, `You have ${user.gems} gems.`);
+  } else {
+    bot.sendMessage(chatId, "You're not registered. Send /start to register.");
+  }
+});
 
-// Export the app for Vercel serverless function
-module.exports = app;
+// Bot command to add gems
+bot.onText(/\/addgems/, async (msg) => {
+  const chatId = msg.chat.id;
+  const user = await User.findOne({ telegramId: chatId });
+  if (user) {
+    user.gems += 100; // Add 100 gems
+    await user.save();
+    bot.sendMessage(chatId, `You now have ${user.gems} gems.`);
+  } else {
+    bot.sendMessage(chatId, "You need to register first. Send /start to register.");
+  }
+});
+
+// API endpoint to fetch user gems (for frontend)
+app.get('/api/gems', async (req, res) => {
+  const telegramId = req.query.telegramId; // Fetch by telegramId
+  const user = await User.findOne({ telegramId });
+  if (!user) {
+    return res.status(404).json({ message: 'User not found' });
+  }
+  res.json({ gems: user.gems });
+});
+
+// Start the server
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
