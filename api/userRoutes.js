@@ -1,8 +1,8 @@
 const express = require('express');
 const router = express.Router();
-const User = require('../models/User');
+const User = require('../models/User'); // Adjust path to your models
 
-// Fetch user data by Telegram ID
+// GET user data by Telegram ID
 router.get('/:telegramId', async (req, res) => {
   const { telegramId } = req.params;
   try {
@@ -16,7 +16,7 @@ router.get('/:telegramId', async (req, res) => {
   }
 });
 
-// Update gems and level for a user by Telegram ID
+// POST to update gems and level for a user by Telegram ID
 router.post('/:telegramId', async (req, res) => {
   const { telegramId } = req.params;
   const { gems, level } = req.body;
