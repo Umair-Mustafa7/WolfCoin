@@ -3,37 +3,18 @@ import { FaGem, FaLevelUpAlt, FaTrophy } from 'react-icons/fa';
 import { CircularProgressbar, buildStyles } from 'react-circular-progressbar';
 import 'react-circular-progressbar/dist/styles.css';
 import { motion } from 'framer-motion';
-import axios from 'axios';
 import toast, { Toaster } from 'react-hot-toast';
 import { GemContext } from './GemContext';
 
-const Farming = ({ telegramId }) => {
+const Farming = () => {
   const { gems, addGems } = useContext(GemContext);
   const [level, setLevel] = useState(1);
   const [timeLeft, setTimeLeft] = useState(0);
   const [showModal, setShowModal] = useState(false);
   const [buttonVisible, setButtonVisible] = useState(true);
-  const [achievements, setAchievements] = useState([]); // New: Achievements
   const [userName, setUserName] = useState('User');
+  const [achievements, setAchievements] = useState([]);
   const farmingInterval = 20000;
-
-  // Fetch user data on component mount
-  useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        const response = await axios.get(`/api/users/${telegramId}`);
-        addGems(response.data.gems);
-        setLevel(response.data.level || 1);
-        setUserName(response.data.username || 'User');
-        setAchievements(response.data.achievements || []);
-        toast.success('Welcome back! Keep farming those gems!');
-      } catch (error) {
-        toast.error('Failed to load user data');
-      }
-    };
-
-    fetchUserData();
-  }, [telegramId, addGems]);
 
   // Countdown timer logic
   useEffect(() => {
@@ -48,27 +29,19 @@ const Farming = ({ telegramId }) => {
     return () => clearInterval(interval);
   }, [timeLeft]);
 
-  // Handle gem collection and update user data in MongoDB
-  const handleCollectGems = async () => {
+  // Handle gem collection
+  const handleCollectGems = () => {
     if (timeLeft <= 0) {
       const newGemCount = gems + 100;
       const newLevel = Math.floor(newGemCount / 500) + 1;
 
-      addGems(100);  // Update global gems context
+      addGems(100); // Update global gems context
       setLevel(newLevel);
       setTimeLeft(farmingInterval);
       setShowModal(true);
       setButtonVisible(false);
 
-      try {
-        await axios.post(`/api/users/${telegramId}`, {
-          gems: newGemCount,
-          level: newLevel,
-        });
-        toast.success(`You collected 100 gems! You're now at Level ${newLevel}.`);
-      } catch (error) {
-        toast.error('Error collecting gems');
-      }
+      toast.success(`You collected 100 gems! You're now at Level ${newLevel}.`);
     }
   };
 

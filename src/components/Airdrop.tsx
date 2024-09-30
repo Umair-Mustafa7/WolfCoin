@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { FaRocket, FaGift, FaLock, FaClock } from 'react-icons/fa';
 
 // Define the airdrop end date (20 days from September 26, 2024)
-const airdropDate = new Date(2024, 8, 26); // September is month 8 in JavaScript (0-indexed)
+const airdropDate = new Date(2024, 8, 30); // September is month 8 in JavaScript (0-indexed)
 airdropDate.setDate(airdropDate.getDate() + 20); // Add 20 days to September 26, 2024
 
 // Function to calculate time left until the airdrop date
