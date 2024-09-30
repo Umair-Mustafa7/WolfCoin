@@ -6,8 +6,9 @@
   "scripts": {
     "dev": "vite",
     "start": "node api/server.js",
-    "build": "prisma generate && react build",
+    "build": "prisma generate && vite build",
     "lint": "eslint .",
+
     "preview": "vite preview"
   },
   "dependencies": {
