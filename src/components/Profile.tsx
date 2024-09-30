@@ -1,12 +1,10 @@
-import React from 'react';
-
-const Profile = () => {
-  return (
-    <div className="p-8">
-      <h1 className="text-4xl font-bold text-purple-500">Profile Page</h1>
-      <p className="mt-4 text-lg text-gray-600">This is your profile.</p>
-    </div>
-  );
-};
+import react from 'react'
+function Profile (){
+    return(
+        <div>
+        <h1>Profile</h1>
+        </div>
+    )
+}
 
 export default Profile;

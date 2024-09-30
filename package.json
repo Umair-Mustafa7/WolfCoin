@@ -5,44 +5,17 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "start": "node api/server.js",
-    "build": "prisma generate && vite build",
+    "build": "vite build",
     "lint": "eslint .",
-
     "preview": "vite preview"
   },
   "dependencies": {
-    "@ant-design/icons": "^5.5.1",
-    "@emotion/react": "^11.13.3",
-    "@emotion/styled": "^11.13.0",
-    "@fortawesome/fontawesome-svg-core": "^6.6.0",
-    "@fortawesome/free-solid-svg-icons": "^6.6.0",
-    "@fortawesome/react-fontawesome": "^0.2.2",
-    "@heroicons/react": "^2.1.5",
-    "@mui/icons-material": "^6.1.1",
-    "@mui/material": "^6.1.1",
-    "@nextui-org/react": "^2.4.8",
-    "@prisma/client": "^5.20.0",
-    "@twa-dev/types": "^7.10.0",
-    "antd": "^5.20.6",
-    "axios": "^1.7.7",
-    "cors": "^2.8.5",
-    "dotenv": "^16.4.5",
-    "express": "^4.21.0",
-    "framer-motion": "^11.5.6",
-    "lottie-react": "^2.4.0",
-    "mongodb": "^5.0.0",
-    "mongoose": "^8.6.3",
-    "node-telegram-bot-api": "^0.66.0",
-    "prisma": "^5.20.0",
+    "framer-motion": "^11.9.0",
     "react": "^18.3.1",
     "react-circular-progressbar": "^2.1.0",
     "react-dom": "^18.3.1",
     "react-hot-toast": "^2.4.1",
-    "react-icons": "^5.3.0",
-    "react-router-dom": "^6.26.2",
-    "styled-components": "^6.1.13",
-    "uuid": "^10.0.0"
+    "react-icons": "^5.3.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.9.0",
@@ -56,12 +29,7 @@
     "eslint-plugin-react-refresh": "^0.4.9",
     "globals": "^15.9.0",
     "postcss": "^8.4.47",
-    "tailwindcss": "^3.4.11",
+    "tailwindcss": "^3.4.13",
     "vite": "^5.4.1"
-  },
-  "description": "This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.",
-  "main": "api/server.js",
-  "keywords": [],
-  "author": "",
-  "license": "ISC"
+  }
 }
