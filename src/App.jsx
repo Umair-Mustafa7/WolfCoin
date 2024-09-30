@@ -13,9 +13,9 @@ function App() {
 
   // Check if the app is opened inside Telegram
   useEffect(() => {
-    const tg = window.Telegram?.WebApp;
+    const tg = window.Telegram?.WebApp; // Check if Telegram WebApp API is available
     if (!tg) {
-      setIsTelegramApp(false); // Not opened in Telegram
+      setIsTelegramApp(false); // Not opened in Telegram, set state to false
     }
   }, []);
 
@@ -39,7 +39,7 @@ function App() {
     );
   }
 
-  // Main app rendering inside Telegram
+  // If inside Telegram, render the main app
   return (
     <GemProvider>
       <Router>
