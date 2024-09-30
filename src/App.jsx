@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Home from './components/Home';
-import Profile from './components/Profile';
+import Profile from './components/Profiles';
 import Tasks from './components/Tasks';
 import Friends from './components/Friends';
 import Airdrop from './components/Airdrop';
