@@ -10,6 +10,8 @@ import Airdrop from './components/Airdrop';
 import Farming from './components/Farming'
 import BottomNav from './components/BottomNav'
 import { GemProvider } from './components/GemContext';
+import { GemProvider } from './context/GemContext.jsx';
+
 
 function App() {
 return (

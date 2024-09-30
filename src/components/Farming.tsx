@@ -5,7 +5,7 @@ import 'react-circular-progressbar/dist/styles.css';
 import { motion } from 'framer-motion';
 import toast, { Toaster } from 'react-hot-toast';
 import { GemContext } from '../context/GemContext';
-import { collectGemsAPI, fetchUserDataAPI } from '../services/api';
+import { collectGemsAPI, fetchUserDataAPI } from '../../services/api';
 
 const Farming = () => {
   const { gems, addGems } = useContext(GemContext);
