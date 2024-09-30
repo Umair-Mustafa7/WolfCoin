@@ -1,0 +1,19 @@
+// prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")  // MongoDB connection string
+}
+
+model User {
+  id         String  @id @default(auto()) @map("_id") @db.ObjectId  // MongoDB ObjectID
+  telegramId String  @unique   // Unique Telegram ID
+  username   String?           // Optional Telegram username
+  gems       Int     @default(0)  // Gems collected
+  level      Int     @default(1)  // User level
+  achievements String[] @default([])  // Optional: List of achievements (array)
+}

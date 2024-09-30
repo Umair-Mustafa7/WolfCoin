@@ -7,31 +7,39 @@ import axios from 'axios';
 import toast, { Toaster } from 'react-hot-toast';
 import { GemContext } from './GemContext';
 
-const Farming = ({ telegramId }) => {
+const Farming = () => {
   const { gems, addGems } = useContext(GemContext);
   const [level, setLevel] = useState(1);
   const [timeLeft, setTimeLeft] = useState(0);
   const [showModal, setShowModal] = useState(false);
   const [buttonVisible, setButtonVisible] = useState(true);
   const [userName, setUserName] = useState('User');
+  const [telegramId, setTelegramId] = useState(null);
   const farmingInterval = 2000;
 
-  // Fetch user data on component mount
+  // Initialize Telegram Web App and get user information
   useEffect(() => {
+    const tg = window.Telegram.WebApp;
+
+    tg.ready(); // Initialize Telegram Web App
+    setUserName(tg.initDataUnsafe.user?.first_name || 'User'); // Fetch username
+    setTelegramId(tg.initDataUnsafe.user?.id); // Fetch Telegram ID
+    
     const fetchUserData = async () => {
       try {
-        const response = await axios.get(`/api/users/${telegramId}`);
+        const response = await axios.get(`/api/users/${tg.initDataUnsafe.user?.id}`);
         addGems(response.data.gems);
         setLevel(response.data.level || 1);
-        setUserName(response.data.username || 'User');
         toast.success('Welcome back! Keep farming those gems!');
       } catch (error) {
         toast.error('Failed to load user data');
       }
     };
 
-    fetchUserData();
-  }, [telegramId, addGems]);
+    if (tg.initDataUnsafe.user?.id) {
+      fetchUserData();  // Fetch user data based on Telegram ID
+    }
+  }, [addGems]);
 
   // Countdown timer logic
   useEffect(() => {
@@ -46,7 +54,7 @@ const Farming = ({ telegramId }) => {
     return () => clearInterval(interval);
   }, [timeLeft]);
 
-  // Handle gem collection and update user data in MongoDB
+  // Handle gem collection and update user data in Prisma
   const handleCollectGems = async () => {
     if (timeLeft <= 0) {
       const newGemCount = gems + 100;
@@ -62,6 +70,7 @@ const Farming = ({ telegramId }) => {
         await axios.post(`/api/users/${telegramId}`, {
           gems: newGemCount,
           level: newLevel,
+          username: userName
         });
         toast.success(`You collected 100 gems! You're now at Level ${newLevel}.`);
       } catch (error) {
@@ -74,7 +83,7 @@ const Farming = ({ telegramId }) => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-600 via-blue-600 to-indigo-700 text-white flex flex-col items-center justify-center p-4 md:p-8 relative">
-      <Toaster />
+      <Toaster /> {/* Notification container */}
 
       <div className="absolute top-4 left-4 flex items-center space-x-4">
         {/* Avatar with level-based frame */}
@@ -86,7 +95,7 @@ const Farming = ({ telegramId }) => {
           } shadow-lg overflow-hidden`}
         >
           <img
-            src="https://via.placeholder.com/100"
+            src={window.Telegram.WebApp.initDataUnsafe.user?.photo_url || "https://via.placeholder.com/100"}
             alt="User Avatar"
             className="object-cover w-full h-full"
           />
@@ -166,6 +175,14 @@ const Farming = ({ telegramId }) => {
           {timeLeft > 0 ? 'Collecting...' : 'Collect 100 Gems'}
         </motion.button>
       )}
+      <div className="absolute top-4 right-4">
+        <motion.button
+          className="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded-full"
+          whileHover={{ scale: 1.1 }}
+        >
+          <FaTrophy className="inline-block mr-2" /> Achievements
+        </motion.button>
+      </div>
 
       {/* Achievement Modal */}
       {showModal && (
