@@ -13,7 +13,7 @@ import { GemProvider } from './components/GemContext';
 
 function App() {
 return (
-  <BrowserRouter>
+  
   <GemProvider>
     <>
 <Router>
@@ -35,7 +35,7 @@ return (
     
     </>
     </GemProvider>
-    </BrowserRouter>
+    
 )
 
 }

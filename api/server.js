@@ -8,6 +8,12 @@ const userRoutes = require('./users'); // Adjust path as per your folder structu
 const app = express();
 let isConnected = false; // Track MongoDB connection status to avoid reconnecting on every function call
 
+app.get('/static/:filename', (req, res) => {
+  res.setHeader('Content-Type', 'application/javascript');
+  res.sendFile(`/path/to/javascript/files/${req.params.filename}`);
+});
+
+
 app.use(cors());
 app.use(express.json());
 
