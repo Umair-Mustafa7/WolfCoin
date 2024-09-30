@@ -1,6 +1,7 @@
 import React from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faHome, faGem, faTasks, faUsers, faGift } from '@fortawesome/free-solid-svg-icons'; // Replace faUser with faGem
+import { faHome, faGem, faTasks, faUsers, faGift } from '@fortawesome/free-solid-svg-icons';
+
 import { Link } from 'react-router-dom'; // Import Link from React Router
 
 const BottomNav = () => {

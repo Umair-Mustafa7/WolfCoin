@@ -4,7 +4,6 @@ import { motion } from 'framer-motion';
 import toast, { Toaster } from 'react-hot-toast';
 import { Button, Card, Typography, Box, Avatar, LinearProgress } from '@mui/material';
 import Lottie from 'lottie-react';
-import successAnimation from '../animations/gem.json'; // Lottie Animation for success
 
 const Tasks = () => {
   const [timeLeft, setTimeLeft] = useState(34 * 3600); // 34 hours for daily reward (in seconds)
