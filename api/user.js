@@ -1,4 +1,4 @@
-import { getUserData } from '../../services/database';
+import { getUserData } from '../src/services/database';
 
 export default async function handler(req, res) {
   const telegramId = 'example-telegram-id'; // Replace with real Telegram ID

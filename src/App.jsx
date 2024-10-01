@@ -10,6 +10,7 @@ import Airdrop from './components/Airdrop';
 import Farming from './components/Farming'
 import BottomNav from './components/BottomNav'
 import { GemProvider } from './context/GemContext.jsx';
+import TelegramLogin from './components/TelegramLogin';
 
 
 function App() {
@@ -19,6 +20,7 @@ return (
 <Router>
 
       <div className="min-h-screen">
+        <TelegramLogin/>
         {/* Define Routes for each page */}
         <Routes>
           <Route path="/" element={<Farming />} />

@@ -7,5 +7,8 @@ export default defineConfig({
     rollupOptions: {
       external: ['react-router-dom'],
     },
+    outDir: 'dist',  // Ensure the output directory is set to 'dist' (default for Vite)
+    sourcemap: true,  // Helpful for debugging production issues
   },
+  
 });
