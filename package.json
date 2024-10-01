@@ -5,9 +5,10 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "vite build && prisma generate",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "postinstall": "prisma generate"
   },
   "dependencies": {
     "@emotion/react": "^11.13.3",
@@ -16,6 +17,7 @@
     "@fortawesome/react-fontawesome": "github:fortawesome/react-fontawesome",
     "@mui/material": "^6.1.1",
     "@prisma/client": "^5.20.0",
+    "prisma": "^3.0.0",
     "@twa-dev/types": "^7.10.0",
     "axios": "^1.7.7",
     "framer-motion": "^11.9.0",
