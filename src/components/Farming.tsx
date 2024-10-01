@@ -47,13 +47,13 @@ const Farming = () => {
             lastName: user?.last_name,
           }, {
             headers: {
-              'Content-Type': 'application/json',  // Set Content-Type to JSON
+              'Content-Type': 'application/json',  // Ensure correct content type
             },
           });
       
           if (response.data.success) {
-            setUserData(response.data.user);  // Set user data in state
-            setLoading(false);  // Stop loading
+            setUserData(response.data.user);  // Set the user data in the state
+            setLoading(false);
           }
         } catch (error) {
           console.error('Error fetching user data:', error);
@@ -90,10 +90,9 @@ const Farming = () => {
   // Handle gem collection (update the gems and level)
   const handleCollectGems = async () => {
     if (timeLeft <= 0 && userData) {
-      const newGemCount = userData.gems + 100; // Add 100 gems
-      const newLevel = Math.floor(newGemCount / 500) + 1; // Update level based on gems
+      const newGemCount = userData.gems + 100;
+      const newLevel = Math.floor(newGemCount / 500) + 1;
   
-      // Update user data in MongoDB via backend API
       try {
         const response = await axios.put('/api/user/update', {
           telegramId: userData.telegramId,
@@ -101,30 +100,29 @@ const Farming = () => {
           level: newLevel,
         }, {
           headers: {
-            'Content-Type': 'application/json' // Ensure content type is set
-          }
+            'Content-Type': 'application/json',  // Ensure correct content type
+          },
         });
   
-        // Update the local state with the new gem count and level
-        setUserData((prevData) => {
-          if (prevData) {
-            return {
-              ...prevData, // Keep all other fields intact
-              gems: newGemCount,
-              level: newLevel,
-            };
-          }
-          return prevData; // If prevData is null, return it
-        });
+        if (response.data.success) {
+          setUserData((prevData) => {
+            if (prevData) {
+              return {
+                ...prevData, // Keep all other fields intact
+                gems: newGemCount,
+                level: newLevel,
+              };
+            }
+            return prevData; // If prevData is null, return it
+          });
   
-        // Reset the timer and hide the button
-        setTimeLeft(farmingInterval);
-        setButtonVisible(false);
+          setTimeLeft(farmingInterval);
+          setButtonVisible(false);
   
-        // Display a success message
-        toast.success(`You collected 100 gems! Now at Level ${newLevel}.`);
+          toast.success(`You collected 100 gems! Now at Level ${newLevel}.`);
+        }
       } catch (error) {
-        console.error('Error updating user data', error);
+        console.error('Error updating user data:', error);
       }
     }
   };
