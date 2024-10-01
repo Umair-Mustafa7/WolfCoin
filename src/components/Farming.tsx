@@ -123,6 +123,7 @@ const Farming = () => {
         }
       } catch (error) {
         console.error('Error updating user data:', error);
+        toast.error('Failed to update user data.');
       }
     }
   };

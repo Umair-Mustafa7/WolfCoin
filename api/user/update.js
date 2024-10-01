@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 
+// Helper function to parse JSON in serverless functions
 const parseJsonBody = async (req) => {
   return new Promise((resolve, reject) => {
     let body = "";
@@ -21,7 +22,7 @@ const prisma = new PrismaClient();
 export default async function handler(req, res) {
   if (req.method === 'PUT') {
     try {
-      const body = await parseJsonBody(req);  // Parse the JSON body
+      const body = await parseJsonBody(req);  // Parse JSON body
       const { telegramId, gems, level } = body;
 
       if (!telegramId || gems === undefined || level === undefined) {
