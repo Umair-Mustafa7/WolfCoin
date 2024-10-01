@@ -12,6 +12,7 @@ model User {
   telegramId  String @unique
   firstName   String?
   lastName    String?
-  gems        Int    @default(0)
-  level       Int    @default(1)
+  gems        Int
+  level       Int
 }
+

@@ -95,7 +95,7 @@ const Farming = () => {
   
       try {
         const response = await axios.put('/api/user/update', {
-          telegramId: userData.telegramId,
+          telegramId: String(userData.telegramId),  // Ensure it's a string
           gems: newGemCount,
           level: newLevel,
         }, {
@@ -127,6 +127,7 @@ const Farming = () => {
       }
     }
   };
+  
 
   // Progress for the circular timer bar
   const progress = (timeLeft / farmingInterval) * 100; // Calculate the progress percentage
