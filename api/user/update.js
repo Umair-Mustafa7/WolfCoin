@@ -1,5 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 
+const prisma = new PrismaClient();
+
 // Helper function to parse JSON in serverless functions
 const parseJsonBody = async (req) => {
   return new Promise((resolve, reject) => {
@@ -17,20 +19,19 @@ const parseJsonBody = async (req) => {
   });
 };
 
-const prisma = new PrismaClient();
-
 export default async function handler(req, res) {
   if (req.method === 'PUT') {
     try {
-      const body = await parseJsonBody(req);  // Parse JSON body
+      const body = await parseJsonBody(req);  // Parse the JSON body
       const { telegramId, gems, level } = body;
 
       if (!telegramId || gems === undefined || level === undefined) {
         return res.status(400).json({ success: false, message: 'Missing required fields' });
       }
 
+      // Ensure telegramId is a string
       const updatedUser = await prisma.user.update({
-        where: { telegramId },
+        where: { telegramId: String(telegramId) },  // Force telegramId to be a string
         data: { gems, level },
       });
 
