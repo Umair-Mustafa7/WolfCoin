@@ -1,17 +1,34 @@
-import { getUserData } from '../src/services/database';
+// /api/user.js
+import { PrismaClient } from '@prisma/client';
+
+const prisma = new PrismaClient();
 
 export default async function handler(req, res) {
-  const telegramId = '6187296748'; // Replace with real Telegram ID
+  const { telegramId, firstName, lastName } = req.body;
 
   try {
-    const user = await getUserData(telegramId);
-    if (user) {
-      res.status(200).json(user);
-    } else {
-      res.status(404).json({ error: 'User not found' });
+    // Check if user exists in MongoDB by their telegramId
+    let user = await prisma.user.findUnique({
+      where: { telegramId },
+    });
+
+    if (!user) {
+      // If user doesn't exist, create a new one
+      user = await prisma.user.create({
+        data: {
+          telegramId,
+          firstName: firstName || "Unknown",
+          lastName: lastName || "",
+          gems: 0,
+          level: 1,
+        },
+      });
     }
+
+    // Return the user data (existing or new)
+    res.status(200).json({ success: true, user });
   } catch (error) {
-    console.error("Error fetching user data:", error);
-    res.status(500).json({ error: 'Failed to fetch user data' });
+    console.error(error);
+    res.status(500).json({ success: false, message: "Server error" });
   }
 }

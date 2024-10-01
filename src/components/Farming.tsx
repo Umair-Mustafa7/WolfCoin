@@ -1,19 +1,57 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FaGem, FaLevelUpAlt, FaTrophy } from 'react-icons/fa';
 import { CircularProgressbar, buildStyles } from 'react-circular-progressbar';
 import 'react-circular-progressbar/dist/styles.css';
 import { motion } from 'framer-motion';
 import toast, { Toaster } from 'react-hot-toast';
-import { GemContext } from './GemContext';
+import axios from 'axios';
+
+// Define the shape of the user data
+interface UserData {
+  telegramId: number;
+  firstName: string;
+  lastName: string;
+  gems: number;
+  level: number;
+}
 
 const Farming = () => {
-  const { gems, addGems } = useContext(GemContext);
-  const [level, setLevel] = useState(1);
+  const [userData, setUserData] = useState<UserData | null>(null); // Updated with UserData type
+  const [loading, setLoading] = useState(true);
   const [timeLeft, setTimeLeft] = useState(0);
-  const [showModal, setShowModal] = useState(false);
   const [buttonVisible, setButtonVisible] = useState(true);
-  const [userName, setUserName] = useState('User');
-  const farmingInterval = 20000;
+
+  const farmingInterval = 20000; // 20 seconds interval for farming
+
+  // Fetch user data from Telegram WebApp and backend API
+  useEffect(() => {
+    const tg = window.Telegram.WebApp;
+    tg.ready();
+
+    const user = tg.initDataUnsafe?.user;
+    const telegramId = user?.id;
+    const firstName = user?.first_name;
+    const lastName = user?.last_name;
+
+    // Fetch or create user in MongoDB via backend API
+    const fetchUserData = async () => {
+      try {
+        const response = await axios.post('/api/user', {
+          telegramId,
+          firstName,
+          lastName,
+        });
+        if (response.data.success) {
+          setUserData(response.data.user); // Set the user data in state
+          setLoading(false); // Turn off loading state
+        }
+      } catch (error) {
+        console.error('Error fetching user data', error);
+      }
+    };
+
+    fetchUserData();
+  }, []);
 
   // Countdown timer logic
   useEffect(() => {
@@ -21,62 +59,70 @@ const Farming = () => {
       if (timeLeft > 0) {
         setTimeLeft((prev) => prev - 1000);
       } else {
-        setButtonVisible(true);
+        setButtonVisible(true); // Show button when timer reaches zero
       }
     }, 1000);
 
-    return () => clearInterval(interval);
+    return () => clearInterval(interval); // Clean up the interval
   }, [timeLeft]);
 
-  // Handle gem collection with API call
+  // Handle gem collection (update the gems and level)
   const handleCollectGems = async () => {
-    if (timeLeft <= 0) {
+    if (timeLeft <= 0 && userData) {
+      const newGemCount = userData.gems + 100; // Add 100 gems
+      const newLevel = Math.floor(newGemCount / 500) + 1; // Update level based on gems
+
+      // Update user data in MongoDB via backend API
       try {
-        const response = await fetch(' https://cfc6-2400-adc7-1921-5100-5c8a-87ba-558d-6c4d.ngrok-free.app/api/collect-gems', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            gems: 100,
-          }),
+        await axios.put('/api/user/update', {
+          telegramId: userData.telegramId,
+          gems: newGemCount,
+          level: newLevel,
         });
-        
 
-        if (response.ok) {
-          const data = await response.json();
-          const newGemCount = data.gems;
-          const newLevel = Math.floor(newGemCount / 500) + 1;
+        // Update the local state with the new gem count and level
+        setUserData((prevData) => {
+          if (prevData) {
+            return {
+              ...prevData, // Spread the existing data
+              gems: newGemCount,
+              level: newLevel,
+            };
+          }
+          return prevData; // If prevData is null, just return it as is
+        });
 
-          addGems(100); // Update global gems context
-          setLevel(newLevel);
-          setTimeLeft(farmingInterval);
-          setShowModal(true);
-          setButtonVisible(false);
+        // Reset the timer and hide the button
+        setTimeLeft(farmingInterval);
+        setButtonVisible(false);
 
-          toast.success(`You collected 100 gems! You're now at Level ${newLevel}.`);
-        } else {
-          throw new Error('Failed to collect gems');
-        }
+        // Display a success message
+        toast.success(`You collected 100 gems! Now at Level ${newLevel}.`);
       } catch (error) {
-        toast.error('Failed to collect gems. Please try again later.');
+        console.error('Error updating user data', error);
       }
     }
   };
 
-  const progress = (timeLeft / farmingInterval) * 100;
+  // Progress for the circular timer bar
+  const progress = (timeLeft / farmingInterval) * 100; // Calculate the progress percentage
+
+  // Render the UI for loading state, and user data when available
+  if (loading || !userData) {
+    return <div>Loading user data...</div>; // Show loading until data is fetched
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-600 via-blue-600 to-indigo-700 text-white flex flex-col items-center justify-center p-4 md:p-8 relative">
-      <Toaster />
+      <Toaster /> {/* Toast notification */}
 
+      {/* User Avatar and Level */}
       <div className="absolute top-4 left-4 flex items-center space-x-4">
-        {/* Avatar with level-based frame */}
         <motion.div
           whileHover={{ scale: 1.1, rotate: 5 }}
-          transition={{ type: "spring", stiffness: 300 }}
+          transition={{ type: 'spring', stiffness: 300 }}
           className={`relative w-12 h-12 md:w-16 md:h-16 rounded-full border-4 ${
-            level > 10 ? "border-yellow-500" : level > 5 ? "border-gray-300" : "border-purple-500"
+            userData.level > 10 ? 'border-yellow-500' : userData.level > 5 ? 'border-gray-300' : 'border-purple-500'
           } shadow-lg overflow-hidden`}
         >
           <img
@@ -84,56 +130,35 @@ const Farming = () => {
             alt="User Avatar"
             className="object-cover w-full h-full"
           />
-          {/* Avatar Badge for High Levels */}
-          {level >= 10 && (
+          {userData.level >= 10 && (
             <div className="absolute top-0 right-0 bg-yellow-500 p-1 rounded-full shadow-md">
               <FaTrophy className="text-xs text-white" />
             </div>
           )}
         </motion.div>
-
-        {/* Username */}
-        <motion.div 
-          className="flex flex-col items-start"
-          whileHover={{ x: 10, opacity: 1 }}
-          initial={{ x: 0, opacity: 0.8 }}
-          animate={{ opacity: 1, transition: { duration: 0.5 } }}
-        >
-          <p className="text-lg md:text-xl font-semibold text-white">{userName}</p>
-          <motion.p 
-            className="text-sm md:text-base text-purple-200 font-medium"
-            whileHover={{ scale: 1.1, color: "#e5e5e5" }}
-          >
-            Level {level}
+        <motion.div className="flex flex-col items-start" whileHover={{ x: 10, opacity: 1 }} initial={{ x: 0, opacity: 0.8 }} animate={{ opacity: 1, transition: { duration: 0.5 } }}>
+          <p className="text-lg md:text-xl font-semibold text-white">{userData.firstName}</p>
+          <motion.p className="text-sm md:text-base text-purple-200 font-medium" whileHover={{ scale: 1.1, color: '#e5e5e5' }}>
+            Level {userData.level}
           </motion.p>
         </motion.div>
       </div>
 
       {/* Gem Counter */}
-      <motion.div 
-        className="w-full max-w-lg mb-8 p-6 rounded-3xl shadow-xl bg-white bg-opacity-10 border border-white text-center"
-        initial={{ opacity: 0 }} 
-        animate={{ opacity: 1 }} 
-        transition={{ duration: 0.5 }}
-      >
+      <motion.div className="w-full max-w-lg mb-8 p-6 rounded-3xl shadow-xl bg-white bg-opacity-10 border border-white text-center" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }}>
         <h1 className="text-3xl md:text-5xl font-extrabold text-white">Gem Farming</h1>
         <div className="flex justify-center items-center mt-6">
           <FaGem className="text-5xl text-yellow-500 mr-4" />
-          <span className="text-4xl font-bold text-white">Gems: {gems}</span>
+          <span className="text-4xl font-bold text-white">Gems: {userData.gems}</span>
         </div>
         <div className="flex justify-center items-center mt-4">
           <FaLevelUpAlt className="text-4xl text-yellow-500 mr-4" />
-          <span className="text-3xl font-bold text-white">Level: {level}</span>
+          <span className="text-3xl font-bold text-white">Level: {userData.level}</span>
         </div>
       </motion.div>
 
       {/* Circular Progress Bar */}
-      <motion.div
-        className="mb-6 md:mb-10"
-        initial={{ scale: 0.8 }}
-        animate={{ scale: 1 }}
-        transition={{ duration: 0.5 }}
-      >
+      <motion.div className="mb-6 md:mb-10" initial={{ scale: 0.8 }} animate={{ scale: 1 }} transition={{ duration: 0.5 }}>
         <div className="relative w-40 h-40 md:w-56 md:h-56">
           <CircularProgressbar
             value={progress}
@@ -159,41 +184,6 @@ const Farming = () => {
         >
           {timeLeft > 0 ? 'Collecting...' : 'Collect 100 Gems'}
         </motion.button>
-      )}
-      <div className="absolute top-4 right-4">
-        <motion.button
-          className="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded-full"
-          whileHover={{ scale: 1.1 }}
-        >
-          <FaTrophy className="inline-block mr-2" /> Achievements
-        </motion.button>
-      </div>
-
-      {/* Achievement Modal */}
-      {showModal && (
-        <motion.div
-          className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-70"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.5 }}
-        >
-          <motion.div
-            className="bg-gray-800 p-8 rounded-xl shadow-2xl text-center"
-            initial={{ scale: 0.8 }}
-            animate={{ scale: 1 }}
-            transition={{ duration: 0.3 }}
-          >
-            <h2 className="text-3xl font-bold text-green-500">Gems Collected!</h2>
-            <p className="mt-4 text-lg text-white">You've collected <span className="font-bold text-green-400">100 Gems!</span></p>
-            <p className="mt-2 text-lg text-white">Level: {level}</p>
-            <button
-              onClick={() => setShowModal(false)}
-              className="mt-6 py-2 px-6 bg-gradient-to-r from-blue-500 to-green-500 rounded-full text-white font-bold transition hover:scale-110"
-            >
-              Close
-            </button>
-          </motion.div>
-        </motion.div>
       )}
     </div>
   );
