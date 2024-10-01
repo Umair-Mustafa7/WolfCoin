@@ -8,7 +8,7 @@ const TelegramLogin = () => {
     script.async = true;
     script.setAttribute("data-telegram-login", "jkehfjsefbot");
     script.setAttribute("data-size", "large");
-    script.setAttribute("data-auth-url", " https://671f-2400-adc7-1921-5100-553e-b6bd-28ca-7931.ngrok-free.app/api/auth/telegram");
+    script.setAttribute("data-auth-url", "  https://cfc6-2400-adc7-1921-5100-5c8a-87ba-558d-6c4d.ngrok-free.app/api/auth/telegram");
     script.setAttribute("data-request-access", "write"); // Optional: ask for write access
     document.getElementById("telegram-login").appendChild(script);
   }, []);

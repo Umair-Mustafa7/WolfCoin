@@ -32,7 +32,7 @@ const Farming = () => {
   const handleCollectGems = async () => {
     if (timeLeft <= 0) {
       try {
-        const response = await fetch(' https://671f-2400-adc7-1921-5100-553e-b6bd-28ca-7931.ngrok-free.app/api/collect-gems', {
+        const response = await fetch(' https://cfc6-2400-adc7-1921-5100-5c8a-87ba-558d-6c4d.ngrok-free.app/api/collect-gems', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

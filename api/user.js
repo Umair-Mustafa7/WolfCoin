@@ -1,7 +1,7 @@
 import { getUserData } from '../src/services/database';
 
 export default async function handler(req, res) {
-  const telegramId = 'example-telegram-id'; // Replace with real Telegram ID
+  const telegramId = '6187296748'; // Replace with real Telegram ID
 
   try {
     const user = await getUserData(telegramId);

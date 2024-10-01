@@ -11,11 +11,13 @@ import Farming from './components/Farming'
 import BottomNav from './components/BottomNav'
 import { GemProvider } from './context/GemContext.jsx';
 import TelegramLogin from './components/TelegramLogin';
+import TelegramWebApp from './components/TelegramWebApp';
 
 
 function App() {
 return (
   <GemProvider>
+    <TelegramWebApp/>
     <>
 <Router>
 
