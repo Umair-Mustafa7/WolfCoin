@@ -25,32 +25,48 @@ const Farming = () => {
 
   // Fetch user data from Telegram WebApp and backend API
   useEffect(() => {
-    const tg = window.Telegram.WebApp;
-    tg.ready();
+    const isTelegramAvailable = typeof window !== 'undefined' && window.Telegram;
+    
+    // Check if Telegram WebApp object is available
+    if (isTelegramAvailable && window.Telegram.WebApp) {
+      const tg = window.Telegram.WebApp;
+      tg.ready();
 
-    const user = tg.initDataUnsafe?.user;
-    const telegramId = user?.id;
-    const firstName = user?.first_name;
-    const lastName = user?.last_name;
+      // Extract user information from Telegram WebApp
+      const user = tg.initDataUnsafe?.user;
+      const telegramId = user?.id || 0;
+      const firstName = user?.first_name || 'Unknown';
+      const lastName = user?.last_name || '';
 
-    // Fetch or create user in MongoDB via backend API
-    const fetchUserData = async () => {
-      try {
-        const response = await axios.post('/api/user', {
-          telegramId,
-          firstName,
-          lastName,
-        });
-        if (response.data.success) {
-          setUserData(response.data.user); // Set the user data in state
-          setLoading(false); // Turn off loading state
+      // Fetch or create user in MongoDB via backend API
+      const fetchUserData = async () => {
+        try {
+          const response = await axios.post('/api/user', {
+            telegramId,
+            firstName,
+            lastName,
+          });
+          if (response.data.success) {
+            setUserData(response.data.user); // Set the user data in state
+            setLoading(false); // Turn off loading state
+          }
+        } catch (error) {
+          console.error('Error fetching user data', error);
         }
-      } catch (error) {
-        console.error('Error fetching user data', error);
-      }
-    };
+      };
 
-    fetchUserData();
+      fetchUserData();
+    } else {
+      // Fallback for local development: use dummy data
+      setUserData({
+        telegramId: 1,
+        firstName: 'Test User',
+        lastName: 'Local',
+        gems: 0,
+        level: 1,
+      });
+      setLoading(false);
+    }
   }, []);
 
   // Countdown timer logic
@@ -84,12 +100,12 @@ const Farming = () => {
         setUserData((prevData) => {
           if (prevData) {
             return {
-              ...prevData, // Spread the existing data
+              ...prevData, // Keep all other fields intact
               gems: newGemCount,
               level: newLevel,
             };
           }
-          return prevData; // If prevData is null, just return it as is
+          return prevData; // If prevData is null, return it
         });
 
         // Reset the timer and hide the button
