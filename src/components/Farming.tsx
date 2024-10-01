@@ -87,15 +87,19 @@ const Farming = () => {
     if (timeLeft <= 0 && userData) {
       const newGemCount = userData.gems + 100; // Add 100 gems
       const newLevel = Math.floor(newGemCount / 500) + 1; // Update level based on gems
-
+  
       // Update user data in MongoDB via backend API
       try {
-        await axios.put('/api/user/update', {
+        const response = await axios.put('/api/user/update', {
           telegramId: userData.telegramId,
           gems: newGemCount,
           level: newLevel,
+        }, {
+          headers: {
+            'Content-Type': 'application/json' // Ensure content type is set
+          }
         });
-
+  
         // Update the local state with the new gem count and level
         setUserData((prevData) => {
           if (prevData) {
@@ -107,11 +111,11 @@ const Farming = () => {
           }
           return prevData; // If prevData is null, return it
         });
-
+  
         // Reset the timer and hide the button
         setTimeLeft(farmingInterval);
         setButtonVisible(false);
-
+  
         // Display a success message
         toast.success(`You collected 100 gems! Now at Level ${newLevel}.`);
       } catch (error) {
