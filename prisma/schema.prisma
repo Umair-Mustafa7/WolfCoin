@@ -12,6 +12,5 @@ model User {
   telegramId  String @unique
   gems        Int
   level       Int
-  username    String
 }
 
