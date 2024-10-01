@@ -95,13 +95,13 @@ const Farming = () => {
   
       try {
         const response = await axios.put('/api/user/update', {
-          telegramId: String(userData.telegramId),  // Ensure it's a string
+          telegramId: String(userData.telegramId),  // Convert telegramId to string
           gems: newGemCount,
           level: newLevel,
         }, {
           headers: {
-            'Content-Type': 'application/json',  // Ensure correct content type
-          },
+            'Content-Type': 'application/json'  // Ensure correct content type
+          }
         });
   
         if (response.data.success) {
@@ -122,11 +122,16 @@ const Farming = () => {
           toast.success(`You collected 100 gems! Now at Level ${newLevel}.`);
         }
       } catch (error) {
-        console.error('Error updating user data:', error);
-        toast.error('Failed to update user data.');
+        if (error.response && error.response.status === 404) {
+          toast.error('User not found!');
+        } else {
+          console.error('Error updating user data:', error);
+          toast.error('Failed to update user data.');
+        }
       }
     }
   };
+  
   
 
   // Progress for the circular timer bar
