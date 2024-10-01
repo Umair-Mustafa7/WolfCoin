@@ -42,16 +42,21 @@ const Farming = () => {
       const fetchUserData = async () => {
         try {
           const response = await axios.post('/api/user', {
-            telegramId,
-            firstName,
-            lastName,
+            telegramId: user?.id,
+            firstName: user?.first_name,
+            lastName: user?.last_name,
+          }, {
+            headers: {
+              'Content-Type': 'application/json',  // Set Content-Type to JSON
+            },
           });
+      
           if (response.data.success) {
-            setUserData(response.data.user); // Set the user data in state
-            setLoading(false); // Turn off loading state
+            setUserData(response.data.user);  // Set user data in state
+            setLoading(false);  // Stop loading
           }
         } catch (error) {
-          console.error('Error fetching user data', error);
+          console.error('Error fetching user data:', error);
         }
       };
 
